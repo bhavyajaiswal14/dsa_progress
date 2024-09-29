@@ -14,9 +14,6 @@ import {  useToast } from "@/components/ui/toast"
 import { getUserData, getLeaderboardData, updateTopic } from '../app/dashboard/action'
 import { User, Topic, LeaderboardEntry} from '../app/dashboard/types'
 
-
-
-
 const RadialProgress = ({ value, size }: { value: number, size: number }) => {
   const data = [
     { name: 'Progress', value: value },
