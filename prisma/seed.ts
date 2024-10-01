@@ -13,9 +13,9 @@ const FIXED_USERS = [
 
 // Fixed topics for all users
 const FIXED_TOPICS = [
-  "Maths", "Sorting", "Array", "BS", "Strings", "Linked List", "Recursion",
-  "Bit Manip.", "Stack & Queues", "Sliding window", "Two Pointer", "Heaps",
-  "Greedy Algo.", "BT", "BST", "Graphs", "DP", "Tries"
+  "Maths", "Sorting", "Array", "Binary Search", "Strings", "Linked List", "Recursion",
+  "Bit Manipulation", "Stack & Queues", "Sliding window", "Two Pointer", "Heaps",
+  "Greedy Algo", "Binary Trees", "Binary Search Trees", "Graphs", "Dynamic Programming", "Tries"
 ];
 
 // Seed the database with users and topics

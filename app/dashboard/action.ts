@@ -1,7 +1,7 @@
 'use server'
 
 import { cookies } from 'next/headers'
-import { getUserById, getAllUsers, updateUserTopic } from '@/lib/data'
+import { getUserById, getAllUsers, updateUserTopic, updateUserProfile } from '@/lib/data'
 import { User, LeaderboardEntry, Topic } from './types'
 
 export async function getUserData(): Promise<User> {
@@ -23,6 +23,10 @@ export async function getLeaderboardData(): Promise<LeaderboardEntry[]> {
     progress: calculateOverallProgress(user.topics),
     avatar: '/placeholder.svg?height=40&width=40',
     topics: user.topics,
+    streak: user.streak,
+    points: user.points,
+    githubUrl: user.githubUrl,
+    leetcodeUrl: user.leetcodeUrl
   })).sort((a, b) => b.progress - a.progress)
 }
 
@@ -32,6 +36,14 @@ export async function updateTopic(topicName: string, field: keyof Topic, value: 
     throw new Error('User not authenticated')
   }
   return await updateUserTopic(userId, topicName, field, value)
+}
+
+export async function updateProfile(leetcodeUrl: string, githubUrl: string): Promise<User> {
+  const userId = cookies().get('userId')?.value
+  if (!userId) {
+    throw new Error('User not authenticated')
+  }
+  return await updateUserProfile(userId, leetcodeUrl, githubUrl)
 }
 
 function calculateOverallProgress(topics: Topic[]): number {
