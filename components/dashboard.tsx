@@ -16,6 +16,7 @@ import { getUserData, getLeaderboardData, updateTopic, updateProfile } from '../
 import { User, Topic, LeaderboardEntry, Badge } from '../app/dashboard/types'
 import {  Github, Star, TrendingUp } from 'lucide-react'
 import ModernBadges from '@/components//ui/ModernBadges'; 
+import StreakHeatmap from '@/components//ui/StreakHeatMap';
 
 
 const RadialProgress = ({ value, size }: { value: number, size: number }) => {
@@ -57,14 +58,12 @@ export default function DashboardComponent() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [selectedUser, setSelectedUser] = useState<LeaderboardEntry | null>(null)
+  const [heatmapData, setHeatmapData] = useState([])
   const { toast } = useToast()
   const router = useRouter()
   
 
-  useEffect(() => {
-    fetchUserData()
-    fetchLeaderboardData()
-  }, [])
+
 
   const fetchUserData = async () => {
     try {
@@ -161,6 +160,34 @@ export default function DashboardComponent() {
 
   const renderBadges = (badges: Badge[]) => (  <ModernBadges badges={badges} />)
 
+  const fetchHeatmapData = async () => {
+    try {
+      const response = await fetch('/api/heatmap-data')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      setHeatmapData(data)
+    } catch (error) {
+      console.error('Failed to fetch heatmap data:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load activity data. Please try again later.",
+        variant: "destructive",
+      })
+    }
+  }
+
+
+
+
+  useEffect(() => {
+    fetchUserData();
+    fetchLeaderboardData();
+    fetchHeatmapData();
+  }, []);
+  
+
   return (
     <div className="container mx-auto p-4 bg-stone-950 text-white min-h-screen">
     <h1 className="text-4xl font-bold mb-6 text-green-300">DSA Progress Tracker</h1>
@@ -180,31 +207,23 @@ export default function DashboardComponent() {
             <CardContent>
               <div className="flex justify-center items-center space-x-4">
                 <RadialProgress value={overallProgress} size={200} />
-                <div>
-                  <p className="text-xl font-bold text-green-500 flex items-center">
-                    <TrendingUp className="mr-2" /> Streak: {currentUser?.streak} days
-                  </p>
-                  <p className="text-xl font-bold text-green-500 flex items-center">
-                    <Star className="mr-2" /> Points: {currentUser?.points}
-                  </p>
-                </div>
               </div>
             </CardContent>
-          </Card>
 
 
 {/* BADGES SECTION */}
-<Card className="mb-6 bg-black border-yellow-900">
             <CardHeader>
               <CardTitle className="text-green-500">Badges</CardTitle>
             </CardHeader>
             <CardContent>
               {currentUser && renderBadges(currentUser.badges)}
             </CardContent>
+              <StreakHeatmap data={heatmapData} />
+             {/* <StreakHeatmap data={heatmapData} /> */}
           </Card>
 
 
-          
+        
 {/* TOPICS SECTION */}
           <div className="grid gap-4 md:grid-cols-2">
             {topics.map((topic, index) => (

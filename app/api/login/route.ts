@@ -5,9 +5,6 @@ import { cookies } from 'next/headers'
 export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
-    console.log('Received username:', username);
-    console.log('Received password:', password);
-
     const user = await prisma.user.findUnique({ where: { username } });
     if (!user || user.password !== password) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 400 });

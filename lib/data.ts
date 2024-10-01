@@ -38,6 +38,73 @@ export async function getAllUsers(): Promise<User[]> {
   }))
 }
 
+// export async function updateUserTopic(userId: string, topicName: string, field: keyof Topic, value: number): Promise<Topic> {
+//   const existingTopic = await prisma.topic.findUnique({
+//     where: {
+//       userId_name: {
+//         userId: userId,
+//         name: topicName,
+//       },
+//     },
+//   });
+
+//   if (!existingTopic) {
+//     throw new Error('Topic not found');
+//   }
+
+
+//   // Update or create activity record
+//   const today = new Date()
+//   today.setHours(0, 0, 0, 0)
+
+//   await prisma.activity.upsert({
+//     where: {
+//       userId_createdAt: {
+//         userId: userId,
+//         createdAt: today
+//       }
+//     },
+//     update: {
+//       count: {
+//         increment: 1
+//       }
+//     },
+//     create: {
+//       userId: userId,
+//       count: 1,
+//       createdAt: today
+//     }
+//   })
+
+//   const updatedTopicData: Partial<Topic> = {
+//     name: topicName,
+//     learning: existingTopic.learning,
+//     leetcodeEasy: existingTopic.leetcodeEasy,
+//     leetcodeMedium: existingTopic.leetcodeMedium,
+//     leetcodeHard: existingTopic.leetcodeHard,
+//     [field]: value,
+//   };
+
+//   const updatedTopic = await prisma.topic.update({
+//     where: {
+//       userId_name: {
+//         userId: userId,
+//         name: topicName,
+//       },
+//     },
+//     data: {
+//       [field]: value,
+//       progress: calculateProgress(updatedTopicData),
+//     },
+//   });
+
+//   // Update user's streak and points
+//   await updateUserStreakAndPoints(userId);
+
+//   return updatedTopic;
+// }
+
+
 export async function updateUserTopic(userId: string, topicName: string, field: keyof Topic, value: number): Promise<Topic> {
   const existingTopic = await prisma.topic.findUnique({
     where: {
@@ -51,6 +118,38 @@ export async function updateUserTopic(userId: string, topicName: string, field: 
   if (!existingTopic) {
     throw new Error('Topic not found');
   }
+
+  // Get the current UTC date
+  let todayUTC = new Date();
+  console.log("Today (UTC):", todayUTC);
+
+  // Adjust the date to Indian Standard Time (UTC + 5:30)
+  todayUTC = new Date(todayUTC.getTime() + 5.5 * 60 * 60 * 1000); // Add 5 hours 30 minutes
+  console.log("Today (IST before normalization):", todayUTC);
+
+  // Set hours to midnight for IST (instead of UTC)
+  todayUTC.setHours(0, 0, 0, 0);
+  console.log("Today (IST normalized to midnight):", todayUTC);
+
+  // Update or create activity record
+  await prisma.activity.upsert({
+    where: {
+      userId_createdAt: {
+        userId: userId,
+        createdAt: todayUTC, // Using adjusted IST date
+      },
+    },
+    update: {
+      count: {
+        increment: 1,
+      },
+    },
+    create: {
+      userId: userId,
+      count: 1,
+      createdAt: todayUTC, // Create with IST midnight date
+    },
+  });
 
   const updatedTopicData: Partial<Topic> = {
     name: topicName,
